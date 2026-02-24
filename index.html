@@ -2,33 +2,34 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>דפדפן מאובטח</title>
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; }
-        .nav { background: #222; padding: 10px; display: flex; gap: 10px; align-items: center; }
-        input { flex-grow: 1; padding: 8px; border-radius: 4px; border: none; }
-        button { padding: 8px 15px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; }
-        iframe { width: 100%; height: calc(100% - 50px); border: none; background: white; }
-    </style>
+    <title>מערכת גלישה חסויה</title>
 </head>
 <body>
-    <div class="nav">
-        <input type="text" id="address" placeholder="הכנס כתובת (למשל https://google.com)">
-        <button onclick="browse()">גלוש</button>
-    </div>
-    <iframe id="browser"></iframe>
+    <input type="password" id="token" placeholder="GitHub Token">
+    <input type="text" id="target" placeholder="כתובת אתר">
+    <button onclick="requestSite()">גלוש בסודיות מוחלטת</button>
+    <div id="status"></div>
 
     <script>
-        function browse() {
-            const url = document.getElementById('address').value;
-            const frame = document.getElementById('browser');
-            
-            // --- כאן תדביק את הכתובת שקיבלת מרנדר ---
-            const renderUrl = "https://YOUR-RENDER-NAME.onrender.com/";
-            const pass = "23603892";
+        async function requestSite() {
+            const token = document.getElementById('token').value;
+            const url = document.getElementById('target').value;
+            document.getElementById('status').innerText = "שולח בקשה מוצפנת לגיטהאב...";
 
-            // טוען את האתר בתוך המסגרת
-            frame.src = `${renderUrl}?token=${pass}&url=${encodeURIComponent(url)}`;
+            // הפנייה היא לגיטהאב בלבד! רנדר לא מופיע כאן.
+            await fetch('https://api.github.com/repos/levdov110-a11y/biohack-app/dispatches', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'token ' + token,
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify({
+                    event_type: 'go_fetch',
+                    client_payload: { url: url }
+                })
+            });
+            
+            document.getElementById('status').innerText = "הבקשה עובדת בשרתי גיטהאב. המתן 30 שניות והתוצאה תופיע ב-Artifacts.";
         }
     </script>
 </body>
