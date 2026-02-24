@@ -1,0 +1,19 @@
+name: Hidden Proxy Trigger
+on:
+  repository_dispatch:
+    types: [fetch_site]
+
+jobs:
+  proxy_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Requesting Render
+        run: |
+          # כאן הכתובת נמשכת מה-Secrets ולא מופיעה בדפדפן
+          curl -H "x-my-token: 23603892" "${{ secrets.RENDER_SERVER_URL }}/${{ github.event.client_payload.url }}" > response.html
+      
+      - name: Save Website to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: downloaded_site
+          path: response.html
