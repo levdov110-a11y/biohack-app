@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>הדפדפן הפרטי שלי</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; text-align: center; background: #f4f4f4; }
+        input { width: 70%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        #content { margin-top: 20px; border: 2px solid #ddd; background: white; min-height: 500px; padding: 10px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h2>גלישה פרטית דרך השרת שלי</h2>
+    <input type="text" id="urlInput" placeholder="הכנס כתובת אתר (למשל https://google.com)">
+    <button onclick="loadPage()">גלוש</button>
+
+    <div id="content">כאן יופיע תוכן האתר...</div>
+
+    <script>
+        async function loadPage() {
+            const url = document.getElementById('urlInput').value;
+            const proxyUrl = 'https://YOUR-RENDER-APP-NAME.onrender.com/'; // שנה לכתובת שתקבל מרנדר
+            const token = '12345-secret'; // הסיסמה שקבעת בשרת
+
+            document.getElementById('content').innerText = "טוען...";
+
+            try {
+                const response = await fetch(proxyUrl + url, {
+                    headers: { 'x-my-token': token }
+                });
+                const html = await response.text();
+                
+                // הזרקת התוכן לתוך הדיב - הדפדפן חושב שזה חלק מגיטהאב
+                document.getElementById('content').innerHTML = html;
+            } catch (err) {
+                document.getElementById('content').innerText = "שגיאה בטעינה: " + err;
+            }
+        }
+    </script>
+</body>
+</html>
