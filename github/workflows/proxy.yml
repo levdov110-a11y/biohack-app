@@ -1,19 +1,18 @@
-name: Hidden Proxy Trigger
+name: SecretProxy
 on:
   repository_dispatch:
-    types: [fetch_site]
+    types: [go_fetch]
 
 jobs:
-  proxy_job:
+  fetch_site:
     runs-on: ubuntu-latest
     steps:
-      - name: Requesting Render
+      - name: Fetch from Render
         run: |
-          # כאן הכתובת נמשכת מה-Secrets ולא מופיעה בדפדפן
-          curl -H "x-my-token: 23603892" "${{ secrets.RENDER_SERVER_URL }}/${{ github.event.client_payload.url }}" > response.html
+          # גיטהאב פונה לרנדר בסתר. אף אחד לא רואה את זה מהדפדפן שלך.
+          curl -L "${{ secrets.RENDER_URL }}?token=23603892&url=${{ github.event.client_payload.url }}" > result.html
       
-      - name: Save Website to Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: downloaded_site
-          path: response.html
+          path: .
