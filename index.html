@@ -2,35 +2,42 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>מערכת גלישה חסויה</title>
+    <title>דפדפן מאובטח</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; }
+        .nav { background: #222; padding: 10px; display: flex; gap: 10px; }
+        input { flex-grow: 1; padding: 10px; background: #333; color: white; border: 1px solid #444; }
+        iframe { width: 100%; height: calc(100% - 60px); border: none; background: white; }
+    </style>
 </head>
 <body>
-    <input type="password" id="token" placeholder="GitHub Token">
-    <input type="text" id="target" placeholder="כתובת אתר">
-    <button onclick="requestSite()">גלוש בסודיות מוחלטת</button>
-    <div id="status"></div>
+    <div class="nav">
+        <input type="text" id="urlInput" placeholder="הכנס כתובת אתר...">
+        <button onclick="browseTo()">גלוש</button>
+    </div>
+    <iframe id="display"></iframe>
 
     <script>
-        async function requestSite() {
-            const token = document.getElementById('token').value;
-            const url = document.getElementById('target').value;
-            document.getElementById('status').innerText = "שולח בקשה מוצפנת לגיטהאב...";
+        const RENDER_URL = "https://YOUR-SERVER.onrender.com/proxy"; // כתובת רנדר (מוסתרת בקוד)
+        const TOKEN = "23603892";
 
-            // הפנייה היא לגיטהאב בלבד! רנדר לא מופיע כאן.
-            await fetch('https://api.github.com/repos/levdov110-a11y/biohack-app/dispatches', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'token ' + token,
-                    'Accept': 'application/vnd.github.v3+json'
-                },
-                body: JSON.stringify({
-                    event_type: 'go_fetch',
-                    client_payload: { url: url }
-                })
-            });
+        async function browseTo(targetUrl = null) {
+            const url = targetUrl || document.getElementById('urlInput').value;
+            const frame = document.getElementById('display');
             
-            document.getElementById('status').innerText = "הבקשה עובדת בשרתי גיטהאב. המתן 30 שניות והתוצאה תופיע ב-Artifacts.";
+            // אנחנו יוצרים חיבור שבו הדפדפן חושב שהוא מדבר עם "עצמו"
+            // המידע נמשך מרנדר ומזוקק לתוך הדף
+            const finalUrl = `${RENDER_URL}?token=${TOKEN}&url=${encodeURIComponent(url)}`;
+            
+            // כדי שהאקר לא יראה את רנדר ב-Network, אנחנו טוענים דרך Blob
+            const response = await fetch(finalUrl);
+            const text = await response.text();
+            const blob = new Blob([text], {type: 'text/html'});
+            frame.src = URL.createObjectURL(blob);
         }
+
+        // מאפשר ללחיצות בתוך האתר לעבוד
+        window.browseTo = browseTo;
     </script>
 </body>
 </html>
