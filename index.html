@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <title>מערכת גלישה פרטית</title>
     <style>
-        body { font-family: system-ui, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; text-align: center; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #0056b3; }
-        #log { margin-top: 15px; font-size: 14px; color: #555; }
+        #log { margin-top: 15px; font-size: 14px; color: #555; white-space: pre-wrap; }
     </style>
 </head>
 <body>
@@ -17,27 +16,34 @@
         <h2>כניסה למערכת</h2>
         <input type="password" id="ghToken" placeholder="הכנס GitHub Token">
         <input type="text" id="targetUrl" placeholder="כתובת אתר (למשל google.com)">
-        <button onclick="runProxy()">הפעל גלישה בחו"ל</button>
+        <button id="btn">הפעל גלישה בחו"ל</button>
         <div id="log"></div>
     </div>
 
     <script>
-        async function runProxy() {
+        // שימוש במאזין אירועים במקום onclick כדי למנוע שגיאות ReferenceError
+        document.getElementById('btn').addEventListener('click', async function() {
             const token = document.getElementById('ghToken').value;
             const url = document.getElementById('targetUrl').value;
             const log = document.getElementById('log');
 
+            // --- שנה רק את שני אלו ---
+            const REPO_OWNER = "levdov110-a11y"; 
+            const REPO_NAME = "biohack-app";
+            // -------------------------
+
             if (!token || !url) { alert("נא למלא את כל השדות"); return; }
 
-            log.innerText = "שולח בקשה מוצפנת לגיטהאב...";
+            log.style.color = "black";
+            log.innerText = "שולח בקשה לגיטהאב...";
 
             try {
-                // הבקשה נשלחת לגיטהאב בלבד - רנדר לא מופיע כאן!
-                const response = await fetch('https://api.github.com/repos/YOUR_USER/YOUR_REPO/dispatches', {
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/dispatches`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Authorization': 'token ' + token,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         event_type: 'fetch_site',
@@ -47,15 +53,17 @@
 
                 if (response.ok) {
                     log.style.color = "green";
-                    log.innerText = "הבקשה התקבלה! השרת בחו"ל מעבד את האתר עכשיו. בדוק את ה-Artifacts בעוד דקה.";
+                    log.innerText = "הצלחה! הבקשה נשלחה.\nהמתן כ-30 שניות ואז בדוק את ה-Actions בגיטהאב.";
                 } else {
-                    throw new Error("שגיאת הרשאה או שם משתמש שגוי");
+                    const errData = await response.json();
+                    log.style.color = "red";
+                    log.innerText = "שגיאה מגיטהאב: " + (errData.message || "בדוק את הטוקן שלך");
                 }
             } catch (err) {
                 log.style.color = "red";
-                log.innerText = "שגיאה: " + err.message;
+                log.innerText = "שגיאת חיבור: " + err.message;
             }
-        }
+        });
     </script>
 </body>
 </html>
