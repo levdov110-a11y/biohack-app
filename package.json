@@ -1,6 +1,13 @@
 {
-  "name": "proxy-engine",
+  "name": "proxy-server",
   "version": "1.0.0",
-  "scripts": { "start": "node server.js" },
-  "dependencies": { "cors-anywhere": "^0.4.4" }
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12"
+  }
 }
